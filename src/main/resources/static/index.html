@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini LeetCode - Portfolio Project</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+</head>
+<body>
+
+<!-- ============================================================
+     Navigation Bar
+============================================================ -->
+<nav class="navbar">
+    <div class="nav-brand" onclick="showPage('problems')">
+        <span class="logo-icon">💻</span>
+        Mini<span style="color:var(--text-primary)">LeetCode</span>
+    </div>
+    <div class="nav-links">
+        <button class="nav-link active" data-page="problems">Problems</button>
+        <button class="nav-link"        data-page="submissions">Submissions</button>
+        <button class="nav-link"        data-page="users">Users</button>
+    </div>
+</nav>
+
+<!-- ============================================================
+     Main Container
+============================================================ -->
+<div class="container">
+
+    <!-- --------------------------------------------------------
+         PROBLEMS PAGE
+    -------------------------------------------------------- -->
+    <div id="page-problems" class="page active">
+
+        <div class="page-header">
+            <h1>Problem Set</h1>
+            <p>Browse coding challenges. Click a problem to view details and submit a solution.</p>
+        </div>
+
+        <!-- Demo notice -->
+        <div class="demo-banner">
+            📌 <strong>Demo Mode</strong> — Sample data is pre-loaded on startup.
+            The judge simulates results (50% Accepted, 30% Wrong Answer, 12% TLE, 8% Compile Error).
+            Default credentials: <code>admin / admin123</code>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card stat-easy">
+                <span class="stat-value" id="stat-easy">—</span>
+                <span class="stat-label">Easy</span>
+            </div>
+            <div class="stat-card stat-medium">
+                <span class="stat-value" id="stat-medium">—</span>
+                <span class="stat-label">Medium</span>
+            </div>
+            <div class="stat-card stat-hard">
+                <span class="stat-value" id="stat-hard">—</span>
+                <span class="stat-label">Hard</span>
+            </div>
+            <div class="stat-card stat-total">
+                <span class="stat-value" id="stat-total">—</span>
+                <span class="stat-label">Total</span>
+            </div>
+        </div>
+
+        <!-- Search / Filter -->
+        <div class="filter-bar">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Search problems by title or tag..."
+                oninput="filterProblems()"
+            >
+            <select id="difficulty-filter" onchange="filterProblems()">
+                <option value="">All Difficulties</option>
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+            </select>
+        </div>
+
+        <!-- Problems Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Difficulty</th>
+                        <th>Tags</th>
+                        <th>Acceptance</th>
+                        <th>Submissions</th>
+                    </tr>
+                </thead>
+                <tbody id="problems-tbody">
+                    <tr>
+                        <td colspan="6" class="loading">
+                            <div class="spinner"></div><br>Loading problems...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Problem Detail + Submit Form (shown on row click) -->
+        <div id="problem-detail" class="problem-detail">
+
+            <!-- Left: Problem Details -->
+            <div class="panel">
+                <h2 id="detail-title">Problem Title</h2>
+
+                <div style="margin-bottom:1rem" id="detail-difficulty"></div>
+                <div id="detail-tags" style="margin-bottom:1rem"></div>
+
+                <h3>Description</h3>
+                <p id="detail-description"></p>
+
+                <h3>Example Input</h3>
+                <div class="code-block" id="detail-example-in"></div>
+
+                <h3>Example Output</h3>
+                <div class="code-block" id="detail-example-out"></div>
+
+                <h3>Constraints</h3>
+                <p id="detail-constraints" style="font-family:monospace;font-size:0.85rem"></p>
+            </div>
+
+            <!-- Right: Submission Form -->
+            <div class="panel">
+                <h2>✏️ Submit Solution</h2>
+
+                <form onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="submit-user-id">Your User ID</label>
+                        <input
+                            type="number"
+                            id="submit-user-id"
+                            placeholder="e.g. 1 (admin), 2 (alice)..."
+                            min="1"
+                            required
+                        >
+                        <small style="color:var(--text-muted);font-size:0.8rem">
+                            Use IDs 1–5 for seeded users. Check the Users tab for IDs.
+                        </small>
+                    </div>
+
+                    <input type="hidden" id="submit-problem-id">
+
+                    <div class="form-group">
+                        <label for="submit-language">Language</label>
+                        <select id="submit-language">
+                            <option value="java">Java</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="cpp">C++</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="submit-code">Your Code</label>
+                        <textarea
+                            id="submit-code"
+                            placeholder="// Paste or type your solution here..."
+                            required
+                        ></textarea>
+                    </div>
+
+                    <div style="display:flex;gap:0.75rem;align-items:center">
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            ▶ Submit Solution
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="hideProblemDetail()">
+                            ✕ Close
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div><!-- /page-problems -->
+
+
+    <!-- --------------------------------------------------------
+         SUBMISSIONS PAGE
+    -------------------------------------------------------- -->
+    <div id="page-submissions" class="page">
+
+        <div class="page-header">
+            <h1>Submissions</h1>
+            <p>Browse recent submissions across all users. Filter by user ID or status.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <input
+                type="number"
+                id="sub-user-filter"
+                placeholder="Filter by User ID..."
+                min="1"
+                style="max-width:200px"
+            >
+            <select id="sub-status-filter">
+                <option value="">All Statuses</option>
+                <option value="ACCEPTED">Accepted</option>
+                <option value="WRONG_ANSWER">Wrong Answer</option>
+                <option value="TIME_LIMIT">Time Limit</option>
+                <option value="COMPILE_ERROR">Compile Error</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="filterSubmissions()">Filter</button>
+            <button class="btn btn-secondary btn-sm" onclick="loadUserStats()">📊 View Stats</button>
+        </div>
+
+        <!-- Stats panel (shown when "View Stats" is clicked) -->
+        <div id="stats-panel" style="display:none;margin-bottom:1.5rem"></div>
+
+        <!-- Submissions Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Problem</th>
+                        <th>Language</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody id="submissions-tbody">
+                    <tr>
+                        <td colspan="7" class="loading">
+                            <div class="spinner"></div><br>Loading submissions...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div><!-- /page-submissions -->
+
+
+    <!-- --------------------------------------------------------
+         USERS PAGE
+    -------------------------------------------------------- -->
+    <div id="page-users" class="page">
+
+        <div class="page-header">
+            <h1>Users</h1>
+            <p>All registered users and their progress.</p>
+        </div>
+
+        <div style="margin-bottom:1.5rem">
+            <button class="btn btn-primary" onclick="openRegisterModal()">
+                + Register New User
+            </button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Solved</th>
+                        <th>Rank</th>
+                    </tr>
+                </thead>
+                <tbody id="users-tbody">
+                    <tr>
+                        <td colspan="6" class="loading">
+                            <div class="spinner"></div><br>Loading users...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div><!-- /page-users -->
+
+</div><!-- /container -->
+
+
+<!-- ============================================================
+     Register User Modal
+============================================================ -->
+<div id="register-modal" class="modal-overlay" onclick="if(event.target===this)closeRegisterModal()">
+    <div class="modal">
+        <h2>👤 Register New User</h2>
+        <form id="register-form" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" placeholder="e.g. johndoe" minlength="3" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" placeholder="Min. 6 characters" minlength="6" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeRegisterModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="register-btn">Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     Toast Notifications Container
+============================================================ -->
+<div id="toast-container" class="toast-container"></div>
+
+
+<script src="/js/app.js"></script>
+</body>
+</html>
