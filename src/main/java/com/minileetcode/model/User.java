@@ -62,8 +62,9 @@ public class User {
     /**
      * Simple rank label (e.g. "Beginner", "Intermediate", "Expert").
      * Derived from totalSolved for display purposes.
+     * Column name is "user_rank" because "rank" is a reserved keyword in MySQL 8.
      */
-    @Column(length = 30)
+    @Column(name = "user_rank", length = 30)
     private String rank;
 
     /** Auto-populate createdAt before the entity is first persisted */
